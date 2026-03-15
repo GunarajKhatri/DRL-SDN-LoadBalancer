@@ -74,7 +74,14 @@ class ServerMonitor:
         self.monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join(timeout=5)
+            self.monitor_thread = None
         print("[Monitor] Stopped monitoring")
+
+    def reset_connections(self):
+        """Zero out connection counts for all servers (called between episodes)."""
+        for host_name in self.server_hosts:
+            if host_name in self.metrics:
+                self.metrics[host_name]['connections'] = 0
     
     def _monitor_loop(self, interval):
         """Background monitoring loop"""

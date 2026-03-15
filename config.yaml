@@ -5,12 +5,12 @@ controller_url: "http://127.0.0.1:8080/sdrlb"
 
 # DRL Agent Configuration
 drl:
-  state_dim: 18           # 3 servers * 6 metrics (CPU, Mem, RTT, Load, ConnRate, RTTTrend)
+  state_dim: 9            # 3 servers * 3 features (connections, load, delta)
   action_dim: 3           # Select h1, h2, or h3
   hidden_dim: 64          # Neural network hidden layer size
   epsilon_start: 1.0      # Initial exploration rate
   epsilon_min: 0.05       # Minimum exploration rate
-  epsilon_decay: 0.995    # Epsilon decay per episode
+  epsilon_decay: 0.9998   # Per-step decay: 0.9998^15000 ≈ 0.05 (~500 episodes × 30 steps)
   learning_rate: 0.0003   # Reduced learning rate for stability
 
 # Training Configuration
@@ -67,3 +67,8 @@ evaluation:
 logging:
   save_interval: 10       # Save checkpoint every N episodes
   log_interval: 1         # Print stats every N episodes
+
+# Inference (controller startup load + inference.py)
+inference:
+  enabled: true
+  model_path: "models/final/dqn_final.pth"

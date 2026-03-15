@@ -56,14 +56,15 @@ class DQNAgent:
             epsilon = self.epsilon
             
         if np.random.random() < epsilon:
-            return np.random.randint(self.action_dim)
+            return np.random.randint(self.action_dim), None
         
         # Convert state to tensor
         state = torch.FloatTensor(state).unsqueeze(0)  # Add batch dimension
         
         with torch.no_grad():
             q_values = self.q_net(state)
-            return q_values.argmax(dim=1).item()
+            action = q_values.argmax(dim=1).item()
+            return action, q_values.squeeze().cpu().numpy()
 
     def remember(self, state, action, reward, next_state, done):
         """Store transition in replay memory"""
@@ -96,17 +97,31 @@ class DQNAgent:
             # If done, target is just reward. Otherwise reward + gamma * next_q
             targets = rewards + (1 - dones) * self.config['training']['gamma'] * next_q
         
-        # Compute loss
-        loss = nn.MSELoss()(current_q, targets)
+        # Compute loss (Huber loss for stability)
+        loss = nn.SmoothL1Loss()(current_q, targets)
         
         # Optimize
         self.optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.q_net.parameters(), 1.0)
+        
+        # Debug: Gradient norm
+        total_norm = 0.0
+        for p in self.q_net.parameters():
+            if p.grad is not None:
+                param_norm = p.grad.data.norm(2)
+                total_norm += param_norm.item() ** 2
+        total_norm = total_norm ** 0.5
+        
+        # Clip gradients (increased to 10.0)
+        torch.nn.utils.clip_grad_norm_(self.q_net.parameters(), 10.0)
         self.optimizer.step()
         
         # Decay epsilon
         self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
+        
+        # Store for debug
+        self.last_q_values = current_q.detach().mean().item()
+        self.last_grad_norm = total_norm
         
         return loss.item()
 

@@ -51,6 +51,23 @@ This will:
 - Start the DRL agent training loop.
 - Generate traffic using `ab` (ApacheBench).
 
+### 3. Run inference (after training)
+1. Start the controller: `ryu-manager ryu_controller.py` (or let it load the model from `config.yaml` at startup).
+2. Optionally push weights: `python inference.py` (if the controller did not load the model at startup).
+3. Start Mininet: `sudo ./venv/bin/python3 mininet_topology.py`, then in another terminal run `sudo ./venv/bin/python3 setup_network.py` (with Mininet still running).
+
+### 4. See performance and stabilization
+- **Quick check** (with Mininet CLI running): From a host inside Mininet start HTTP servers and send traffic to the VIP, then on your host run:
+  ```bash
+  curl -s http://127.0.0.1:8080/sdrlb/stats
+  ```
+  This shows `total_requests`, `server_selections` (how many requests went to each server), and `recent_decisions`.
+- **Full evaluation** (metrics + stabilization report): Stop the Mininet CLI if it is running, then:
+  ```bash
+  sudo ./venv/bin/python3 run_inference_eval.py --duration 120
+  ```
+  This starts Mininet, generates traffic for 120 seconds, records latency and server distribution, and prints a summary plus an estimate of when the load stabilized (fairness ≥ 0.85 for 15s). Results are saved to `logs/inference_eval_<timestamp>.json` and optionally `plots/inference_eval_<timestamp>.png`.
+
 ## 📂 Project Structure
 - `ryu_controller.py`: The SDN controller logic (ARP, VIP, DRL integration).
 - `train.py`: Main training script (Environment loop, Traffic generation).
@@ -59,6 +76,8 @@ This will:
 - `setup_network.py`: Helper script to configure static routes and flows.
 - `traffic_generator.py`: Wrapper for generating HTTP traffic.
 - `real_server_monitor.py`: Monitors server metrics (CPU, Latency).
+- `inference.py`: Pushes trained model weights to the controller for inference.
+- `run_inference_eval.py`: Runs traffic, collects metrics, and reports performance and stabilization.
 
 ## 📊 Features
 - **Dynamic Routing**: DRL agent selects optimal servers per flow.
