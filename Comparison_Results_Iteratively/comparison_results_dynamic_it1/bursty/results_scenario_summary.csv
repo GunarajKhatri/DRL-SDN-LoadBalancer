@@ -1,0 +1,15 @@
+p95_rtt_burst,queue_saturation_events,recovery_time,algorithm,trial,avg_decision_latency_us
+15.58405,119,22.0,round_robin,1,2290.9
+15.608849999999999,119,22.0,round_robin,2,2252.9
+15.6511,119,22.0,weighted_round_robin,1,2099.1
+15.683349999999999,119,22.0,weighted_round_robin,2,2175.1
+15.6373,119,22.0,random,1,2065.6
+15.66435,119,22.0,random,2,2373.4
+15.741,119,22.0,least_connections,1,2295.8
+15.5893,119,22.0,least_connections,2,2121.4
+15.52575,36,22.0,hash_based,1,3041.4
+15.80985,119,22.0,hash_based,2,2252.9
+15.8097,119,22.0,ecmp,1,2248.0
+15.729000000000001,119,22.0,ecmp,2,2324.7
+15.67575,119,15.0,drl,1,2270.6
+15.7393,119,15.0,drl,2,2446.8
